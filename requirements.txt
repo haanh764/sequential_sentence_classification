@@ -1,2 +1,2 @@
-jsonlines
--e git://github.com/ibeltagy/allennlp@fp16_and_others#egg=allennlp
+'allennlp>=2.0'
+'spacy>=2.1.0,<2.2',

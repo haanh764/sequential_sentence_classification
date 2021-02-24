@@ -59,7 +59,7 @@ class SeqClassificationReader(DatasetReader):
         file_path = cached_path(file_path)
 
         with open(file_path) as f:
-            for line in f:
+            for line in self.shard_iterable(f):
                 json_dict = json.loads(line)
                 instances = self.read_one_example(json_dict)
                 for instance in instances:
@@ -199,7 +199,7 @@ class SeqClassificationReader(DatasetReader):
 
         fields: Dict[str, Field] = {}
         fields["sentences"] = ListField([
-                TextField(sentence, self._token_indexers)
+                TextField(sentence)
                 for sentence in sentences
         ])
 
@@ -224,3 +224,9 @@ class SeqClassificationReader(DatasetReader):
             fields["additional_features"] = ArrayField(np.array(additional_features))
 
         return Instance(fields)
+
+    @overrides
+    def apply_token_indexers(self, instance: Instance) -> None:
+        for text_field in instance["sentences"].field_list:
+            text_field.token_indexers = self._token_indexers
+            

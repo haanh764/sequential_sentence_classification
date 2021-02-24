@@ -19,12 +19,12 @@ local boolToInt(s) =
     "word_splitter": "bert-basic",
     "max_sent_per_example": std.extVar("MAX_SENT_PER_EXAMPLE"),
     "token_indexers": {
-          "bert": {
-              "type": "bert-pretrained",
-              "pretrained_model": std.extVar("BERT_VOCAB"),
-              "do_lowercase": true,
-              "use_starting_offsets": false
-          },
+        "tokens": {
+          "type": "pretrained_transformer",
+          "model_name": std.extVar("BERT_MODEL"),
+          "tokenizer_kwargs":{"add_special_tokens": true,
+            "truncation_strategy": 'do_not_truncate'}
+        }
     },
     "use_sep": std.extVar("USE_SEP"),
     "sci_sum": stringToBool(std.extVar("SCI_SUM")),
@@ -39,18 +39,13 @@ local boolToInt(s) =
   "model": {
     "type": "SeqClassificationModel",
     "text_field_embedder": {
-        "allow_unmatched_keys": true,
-        "embedder_to_indexer_map": {
-            "bert": if stringToBool(std.extVar("USE_SEP")) then ["bert"] else ["bert", "bert-offsets"],
-            "tokens": ["tokens"],
-        },
         "token_embedders": {
-            "bert": {
-                "type": "bert-pretrained",
-                "pretrained_model": std.extVar("BERT_WEIGHTS"),
-                "requires_grad": 'all',
-                "top_layer_only": false,
-            }
+            "tokens": {
+              "type": "pretrained_transformer_embedder",
+              "model_name": std.extVar("BERT_MODEL"),
+              "tokenizer_kwargs":{"add_special_tokens": true,
+              "truncation_strategy": 'do_not_truncate'},
+        }
         }
     },
     "use_sep": std.extVar("USE_SEP"),

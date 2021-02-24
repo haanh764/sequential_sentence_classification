@@ -5,7 +5,7 @@ export PYTORCH_SEED=`expr $SEED / 10`
 export NUMPY_SEED=`expr $PYTORCH_SEED / 10`
 
 # path to bert vocab and weights
-export BERT_MODEL = "allenai/scibert_scivocab_cased"
+export BERT_MODEL=allenai/scibert_scivocab_cased
 
 # path to dataset files
 export TRAIN_PATH=data/CSAbstruct/train.jsonl
@@ -34,4 +34,4 @@ export SCI_SUM_FAKE_SCORES=false  # use fake scores for testing
 
 CONFIG_FILE=sequential_sentence_classification/config.jsonnet
 
-python -m allennlp.run train $CONFIG_FILE  --include-package sequential_sentence_classification -s $SERIALIZATION_DIR "$@"
+python -m allennlp train $CONFIG_FILE  --include-package sequential_sentence_classification -s $SERIALIZATION_DIR "$@"

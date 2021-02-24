@@ -12,9 +12,9 @@ from allennlp.data.instance import Instance
 from allennlp.data.fields.field import Field
 from allennlp.data.fields import TextField, LabelField, ListField, ArrayField, MultiLabelField
 from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
-from allennlp.data.tokenizers import WordTokenizer
-from allennlp.data.tokenizers.token import Token
-from allennlp.data.tokenizers.word_splitter import SimpleWordSplitter, WordSplitter, SpacyWordSplitter
+from allennlp.data.tokenizers import PretrainedTransformerTokenizer
+from allennlp.data.tokenizers.token_class import Token
+#from allennlp.data.tokenizers.word_splitter import SimpleWordSplitter, WordSplitter, SpacyWordSplitter
 
 
 @DatasetReader.register("SeqClassificationReader")
@@ -33,7 +33,6 @@ class SeqClassificationReader(DatasetReader):
     def __init__(self,
                  lazy: bool = False,
                  token_indexers: Dict[str, TokenIndexer] = None,
-                 word_splitter: WordSplitter = None,
                  tokenizer: Tokenizer = None,
                  sent_max_len: int = 100,
                  max_sent_per_example: int = 20,
@@ -44,7 +43,7 @@ class SeqClassificationReader(DatasetReader):
                  predict: bool = False,
                  ) -> None:
         super().__init__(lazy)
-        self._tokenizer = WordTokenizer(word_splitter=SpacyWordSplitter(pos_tags=False))
+        self._tokenizer = tokenizer
         self._token_indexers = token_indexers or {"tokens": SingleIdTokenIndexer()}
         self.sent_max_len = sent_max_len
         self.use_sep = use_sep
@@ -229,4 +228,3 @@ class SeqClassificationReader(DatasetReader):
     def apply_token_indexers(self, instance: Instance) -> None:
         for text_field in instance["sentences"].field_list:
             text_field.token_indexers = self._token_indexers
-            

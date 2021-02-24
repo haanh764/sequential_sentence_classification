@@ -16,7 +16,6 @@ local boolToInt(s) =
     "type":"SeqClassificationReader",
     "lazy": false,
     "sent_max_len": std.extVar("SENT_MAX_LEN"),
-    "word_splitter": "bert-basic",
     "max_sent_per_example": std.extVar("MAX_SENT_PER_EXAMPLE"),
     "token_indexers": {
         "tokens": {

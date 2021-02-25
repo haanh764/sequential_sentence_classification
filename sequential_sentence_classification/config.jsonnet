@@ -21,13 +21,14 @@ local boolToInt(s) =
       "tokens": {
             "type": "pretrained_transformer",
             "model_name": std.extVar("BERT_MODEL"),
+            "truncation_strategy" : 'do_not_truncate'}
           }
     },
     "token_indexers": {
         "tokens": {
           "type": "pretrained_transformer",
           "model_name": std.extVar("BERT_MODEL"),
-          "do_lowercase": true
+          "tokenizer_kwargs": {"add_special_tokens": true, "truncation_strategy" : 'do_not_truncate'},
         }
     },
     "use_sep": std.extVar("USE_SEP"),

@@ -28,7 +28,7 @@ local boolToInt(s) =
         "tokens": {
           "type": "pretrained_transformer",
           "model_name": std.extVar("BERT_MODEL"),
-          "tokenizer_kwargs": {"add_special_tokens": true, "truncation_strategy" : 'do_not_truncate'},
+          "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
         }
     },
     "use_sep": std.extVar("USE_SEP"),

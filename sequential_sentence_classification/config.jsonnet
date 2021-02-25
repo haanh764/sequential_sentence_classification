@@ -15,23 +15,19 @@ local boolToInt(s) =
   "dataset_reader":{
     "type":"SeqClassificationReader",
     "lazy": false,
-    "sent_max_len": std.extVar("SENT_MAX_LEN"),
-    "max_sent_per_example": std.extVar("MAX_SENT_PER_EXAMPLE"),
+    "sent_max_len": std.parseInt(std.extVar("SENT_MAX_LEN")),
+    "max_sent_per_example": std.parseInt(std.extVar("MAX_SENT_PER_EXAMPLE")),
     "tokenizer":{
-      "tokens": {
             "type": "pretrained_transformer",
             "model_name": std.extVar("BERT_MODEL"),
             "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
-      }
     },
     "token_indexers": {
-        "tokens": {
           "type": "pretrained_transformer",
           "model_name": std.extVar("BERT_MODEL"),
           "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
-        }
     },
-    "use_sep": std.extVar("USE_SEP"),
+    "use_sep": stringToBool(std.extVar("USE_SEP")),
     "sci_sum": stringToBool(std.extVar("SCI_SUM")),
     "use_abstract_scores": stringToBool(std.extVar("USE_ABSTRACT_SCORES")),
     "sci_sum_fake_scores": stringToBool(std.extVar("SCI_SUM_FAKE_SCORES")),
@@ -44,37 +40,30 @@ local boolToInt(s) =
     "type": "SeqClassificationModel",
     "text_field_embedder": {
         "token_embedders": {
-            "tokens": {
-              "type": "pretrained_transformer_embedder",
+            "bert": {
+              "type": "pretrained_transformer",
               "model_name": std.extVar("BERT_MODEL"),
-              "tokenizer_kwargs":{"add_special_tokens": true,
-              "truncation_strategy": 'do_not_truncate'},
+              "tokenizer_kwargs":{"truncation_strategy": 'do_not_truncate'},
         }
         }
     },
-    "use_sep": std.extVar("USE_SEP"),
-    "with_crf": std.extVar("WITH_CRF"),
+    "use_sep": stringToBool(std.extVar("USE_SEP")),
+    "with_crf": stringToBool(std.extVar("WITH_CRF")),
     "bert_dropout": 0.1,
     "sci_sum": stringToBool(std.extVar("SCI_SUM")),
     "additional_feature_size": boolToInt(stringToBool(std.extVar("USE_ABSTRACT_SCORES"))),
     "self_attn": {
-      "type": "stacked_self_attention",
+      "type": "pytorch_transformer",
       "input_dim": 768,
-      "projection_dim": 100,
       "feedforward_hidden_dim": 50,
       "num_layers": 2,
       "num_attention_heads": 2,
-      "hidden_dim": 100,
     },
   },
-  "iterator": {
-    "type": "bucket",
-    "sorting_keys": [["sentences", "num_fields"]],
-    "batch_size" : std.parseInt(std.extVar("BATCH_SIZE")),
-    "cache_instances": true,
-    "biggest_batch_first": true
+  "data_loader": {
+        "batch_size": std.parseInt(std.extVar("BATCH_SIZE")),
+        "shuffle": true
   },
-
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,

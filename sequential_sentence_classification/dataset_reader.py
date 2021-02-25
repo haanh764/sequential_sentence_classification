@@ -7,11 +7,11 @@ import numpy as np
 
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
 from allennlp.common.file_utils import cached_path
-from allennlp.data import Tokenizer
+from allennlp.data import TokenIndexer, Tokenizer
 from allennlp.data.instance import Instance
 from allennlp.data.fields.field import Field
 from allennlp.data.fields import TextField, LabelField, ListField, ArrayField, MultiLabelField
-from allennlp.data.token_indexers import PretrainedTransformerIndexer, SingleIdTokenIndexer
+from allennlp.data.token_indexers import PretrainedTransformerIndexer
 from allennlp.data.tokenizers import PretrainedTransformerTokenizer
 from allennlp.data.tokenizers.token_class import Token
 
@@ -43,7 +43,7 @@ class SeqClassificationReader(DatasetReader):
                  ) -> None:
         super().__init__(lazy)
         self._tokenizer = tokenizer
-        self._token_indexers = token_indexers or {"tokens": SingleIdTokenIndexer()}
+        self._token_indexers = token_indexers
         self.sent_max_len = sent_max_len
         self.use_sep = use_sep
         self.predict = predict

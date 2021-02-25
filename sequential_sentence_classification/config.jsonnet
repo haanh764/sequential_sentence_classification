@@ -17,12 +17,17 @@ local boolToInt(s) =
     "lazy": false,
     "sent_max_len": std.extVar("SENT_MAX_LEN"),
     "max_sent_per_example": std.extVar("MAX_SENT_PER_EXAMPLE"),
+    "tokenizer":{
+      "tokens": {
+            "type": "pretrained_transformer",
+            "model_name": std.extVar("BERT_MODEL"),
+          }
+    },
     "token_indexers": {
         "tokens": {
           "type": "pretrained_transformer",
           "model_name": std.extVar("BERT_MODEL"),
-          "tokenizer_kwargs":{"add_special_tokens": true,
-            "truncation_strategy": 'do_not_truncate'}
+          "do_lowercase": true
         }
     },
     "use_sep": std.extVar("USE_SEP"),

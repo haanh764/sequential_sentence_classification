@@ -11,10 +11,9 @@ from allennlp.data import Tokenizer
 from allennlp.data.instance import Instance
 from allennlp.data.fields.field import Field
 from allennlp.data.fields import TextField, LabelField, ListField, ArrayField, MultiLabelField
-from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
+from allennlp.data.token_indexers import PretrainedTransformerIndexer, SingleIdTokenIndexer
 from allennlp.data.tokenizers import PretrainedTransformerTokenizer
 from allennlp.data.tokenizers.token_class import Token
-#from allennlp.data.tokenizers.word_splitter import SimpleWordSplitter, WordSplitter, SpacyWordSplitter
 
 
 @DatasetReader.register("SeqClassificationReader")
@@ -32,7 +31,7 @@ class SeqClassificationReader(DatasetReader):
 
     def __init__(self,
                  lazy: bool = False,
-                 token_indexers: Dict[str, TokenIndexer] = None,
+                 token_indexers: Dict[str, PretrainedTransformerIndexer] = None,
                  tokenizer: Tokenizer = None,
                  sent_max_len: int = 100,
                  max_sent_per_example: int = 20,

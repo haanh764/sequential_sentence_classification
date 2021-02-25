@@ -21,8 +21,8 @@ local boolToInt(s) =
       "tokens": {
             "type": "pretrained_transformer",
             "model_name": std.extVar("BERT_MODEL"),
-            "truncation_strategy" : 'do_not_truncate'}
-          }
+            "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
+      }
     },
     "token_indexers": {
         "tokens": {
@@ -36,7 +36,6 @@ local boolToInt(s) =
     "use_abstract_scores": stringToBool(std.extVar("USE_ABSTRACT_SCORES")),
     "sci_sum_fake_scores": stringToBool(std.extVar("SCI_SUM_FAKE_SCORES")),
   },
-
   "train_data_path": std.extVar("TRAIN_PATH"),
   "validation_data_path": std.extVar("DEV_PATH"),
   "test_data_path": std.extVar("TEST_PATH"),

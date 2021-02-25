@@ -31,7 +31,7 @@ class SeqClassificationReader(DatasetReader):
 
     def __init__(self,
                  lazy: bool = False,
-                 token_indexers: Dict[str, PretrainedTransformerIndexer] = None,
+                 token_indexers: TokenIndexer = None,
                  tokenizer: Tokenizer = None,
                  sent_max_len: int = 100,
                  max_sent_per_example: int = 20,

@@ -5,6 +5,42 @@ import sys
 from allennlp.commands import main
 import os
 
+os.environ["SEED"] = "15270"
+os.environ["PYTORCH_SEED"] = "1527"
+os.environ["NUMPY_SEED"] = "1527"
+
+
+# path to bert vocab and weights
+os.environ["BERT_MODEL"] = "allenai/scibert_scivocab_cased"
+
+# path to dataset files
+os.environ["TRAIN_PATH"] = "data/CSAbstruct/train.jsonl"
+os.environ["DEV_PATH"] = "data/CSAbstruct/dev.jsonl"
+os.environ["TEST_PATH"] = "data/CSAbstruct/test.jsonl"
+
+
+# model
+os.environ["USE_SEP"] = "true"
+os.environ["WITH_CRF"] = "false"
+
+# training params
+os.environ["cuda_device"] = "0"
+os.environ["BATCH_SIZE"] = "4"
+os.environ["LR"] = "5e-5"
+os.environ["TRAINING_DATA_INSTANCES"] = "52"
+
+os.environ["NUM_EPOCHS"] = "2"
+
+
+# limit number of sentneces per examples, and number of words per sentence. This is dataset dependant
+os.environ["MAX_SENT_PER_EXAMPLE"] = "10"
+os.environ["SENT_MAX_LEN"] = "80"
+
+
+# this is for the evaluation of the summarization dataset
+os.environ["SCI_SUM"] = "false"
+os.environ["USE_ABSTRACT_SCORES"] = "false"
+os.environ["SCI_SUM_FAKE_SCORES"] = "false"
 
 config_file = "sequential_sentence_classification/config.jsonnet"
 
@@ -26,6 +62,8 @@ sys.argv = [
     "train",
     config_file,
     "-s", serialization_dir,
-    "--include-package", "sequential_sentence_classification","-o", overrides,]
+    "--include-package", "sequential_sentence_classification",
+    "-o", 
+    overrides, ]
 
 main()

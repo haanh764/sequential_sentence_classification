@@ -11,8 +11,8 @@ from allennlp.data import TokenIndexer, Tokenizer
 from allennlp.data.instance import Instance
 from allennlp.data.fields.field import Field
 from allennlp.data.fields import TextField, LabelField, ListField, ArrayField, MultiLabelField
-from allennlp.data.token_indexers import PretrainedTransformerIndexer
-from allennlp.data.tokenizers import PretrainedTransformerTokenizer
+from allennlp.data.token_indexers import SingleIdTokenIndexer
+from allennlp.data.tokenizers import WhitespaceTokenizer
 from allennlp.data.tokenizers.token_class import Token
 
 
@@ -30,8 +30,7 @@ class SeqClassificationReader(DatasetReader):
     """
 
     def __init__(self,
-                 lazy: bool = False,
-                 token_indexers: TokenIndexer = None,
+                 token_indexers: Dict[str, TokenIndexer] = None,
                  tokenizer: Tokenizer = None,
                  sent_max_len: int = 100,
                  max_sent_per_example: int = 20,
@@ -41,9 +40,10 @@ class SeqClassificationReader(DatasetReader):
                  sci_sum_fake_scores: bool = True,
                  predict: bool = False,
                  ) -> None:
-        super().__init__(lazy)
-        self._tokenizer = tokenizer
-        self._token_indexers = token_indexers
+        super().__init__(manual_distributed_sharding=True,
+            manual_multiprocess_sharding=True)
+        self._tokenizer = tokenizer or WhitespaceTokenizer()
+        self._token_indexers = token_indexers or {"tokens": SingleIdTokenIndexer()}
         self.sent_max_len = sent_max_len
         self.use_sep = use_sep
         self.predict = predict
@@ -52,7 +52,61 @@ class SeqClassificationReader(DatasetReader):
         self.use_abstract_scores = use_abstract_scores
         self.sci_sum_fake_scores = sci_sum_fake_scores
 
-    @overrides
+    def text_to_instance(self,
+                         sentences: List[str],
+                         labels: List[str] = None,
+                         confidences: List[float] = None,
+                         additional_features: List[float] = None,
+                         ) -> Instance:
+        if not self.predict:
+            assert len(sentences) == len(labels)
+        if confidences is not None:
+            assert len(sentences) == len(confidences)
+        if additional_features is not None:
+            assert len(sentences) == len(additional_features)
+
+        if self.use_sep:
+            tokenized_sentences = [self._tokenizer.tokenize(s)[:self.sent_max_len] + [Token("[SEP]")] for s in sentences]
+            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]]
+        else:
+            # Tokenize the sentences
+            sentences = [
+                self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]
+                for sentence_text in sentences
+            ]
+
+        fields: Dict[str, Field] = {}
+        fields["sentences"] = ListField([
+                TextField(sentence)
+                for sentence in sentences
+        ])
+
+        if labels is not None:
+            if isinstance(labels[0], list):
+                fields["labels"] = ListField([
+                        MultiLabelField(label) for label in labels
+                    ])
+            else:
+                # make the labels strings for easier identification of the neutral label
+                # probably not strictly necessary
+                if self.sci_sum:
+                    fields["labels"] = ArrayField(np.array(labels))
+                else:
+                    fields["labels"] = ListField([
+                            LabelField(str(label)+"_label") for label in labels
+                        ])
+
+        if confidences is not None:
+            fields['confidences'] = ArrayField(np.array(confidences))
+        if additional_features is not None:
+            fields["additional_features"] = ArrayField(np.array(additional_features))
+
+        return Instance(fields)
+
+    def apply_token_indexers(self, instance: Instance) -> None:
+        for text_field in instance["sentences"].field_list:
+            text_field.token_indexers = self._token_indexers
+
     def _read(self, file_path: str):
         file_path = cached_path(file_path)
 
@@ -171,59 +225,4 @@ class SeqClassificationReader(DatasetReader):
 
         return sentences, labels
 
-    @overrides
-    def text_to_instance(self,
-                         sentences: List[str],
-                         labels: List[str] = None,
-                         confidences: List[float] = None,
-                         additional_features: List[float] = None,
-                         ) -> Instance:
-        if not self.predict:
-            assert len(sentences) == len(labels)
-        if confidences is not None:
-            assert len(sentences) == len(confidences)
-        if additional_features is not None:
-            assert len(sentences) == len(additional_features)
-
-        if self.use_sep:
-            tokenized_sentences = [self._tokenizer.tokenize(s)[:self.sent_max_len] + [Token("[SEP]")] for s in sentences]
-            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]]
-        else:
-            # Tokenize the sentences
-            sentences = [
-                self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]
-                for sentence_text in sentences
-            ]
-
-        fields: Dict[str, Field] = {}
-        fields["sentences"] = ListField([
-                TextField(sentence)
-                for sentence in sentences
-        ])
-
-        if labels is not None:
-            if isinstance(labels[0], list):
-                fields["labels"] = ListField([
-                        MultiLabelField(label) for label in labels
-                    ])
-            else:
-                # make the labels strings for easier identification of the neutral label
-                # probably not strictly necessary
-                if self.sci_sum:
-                    fields["labels"] = ArrayField(np.array(labels))
-                else:
-                    fields["labels"] = ListField([
-                            LabelField(str(label)+"_label") for label in labels
-                        ])
-
-        if confidences is not None:
-            fields['confidences'] = ArrayField(np.array(confidences))
-        if additional_features is not None:
-            fields["additional_features"] = ArrayField(np.array(additional_features))
-
-        return Instance(fields)
-
-    @overrides
-    def apply_token_indexers(self, instance: Instance) -> None:
-        for text_field in instance["sentences"].field_list:
-            text_field.token_indexers = self._token_indexers
+    

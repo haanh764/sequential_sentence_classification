@@ -20,7 +20,7 @@ os.environ["TEST_PATH"] = "data/CSAbstruct/test.jsonl"
 
 
 # model
-os.environ["USE_SEP"] = "true"
+os.environ["USE_SEP"] = "false"
 os.environ["WITH_CRF"] = "false"
 
 # training params
@@ -29,7 +29,7 @@ os.environ["BATCH_SIZE"] = "4"
 os.environ["LR"] = "5e-5"
 os.environ["TRAINING_DATA_INSTANCES"] = "52"
 
-os.environ["NUM_EPOCHS"] = "2"
+os.environ["NUM_EPOCHS"] = "100"
 
 
 # limit number of sentneces per examples, and number of words per sentence. This is dataset dependant
@@ -63,7 +63,6 @@ sys.argv = [
     config_file,
     "-s", serialization_dir,
     "--include-package", "sequential_sentence_classification",
-    "-o", 
-    overrides, ]
+    ]
 
 main()

@@ -26,7 +26,7 @@ local boolToInt(s) =
         },
         "sent_max_len": 10,
         "max_sent_per_example": 80,
-        "use_sep": 1,
+        "use_sep": 0,
         "sci_sum": 0,
         "use_abstract_scores": 0,
         "sci_sum_fake_scores": 0,
@@ -61,7 +61,7 @@ local boolToInt(s) =
   },
   "data_loader": {
         "batch_size": std.parseInt(std.extVar("BATCH_SIZE")),
-        "shuffle": true
+        "shuffle": false
   },
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
@@ -75,7 +75,7 @@ local boolToInt(s) =
       "lr": std.parseJson(std.extVar("LR")),
       "weight_decay": 0.01,
       "parameter_groups": [
-        [["bias", "LayerNorm.bias", "LayerNorm.weight", "layer_norm.weight"], {"weight_decay": 0.0}],
+        [["bias", "LayerNorm.bias", "LayerNorm.weight"], {"weight_decay": 0.0}],
       ],
     },
     "learning_rate_scheduler": {

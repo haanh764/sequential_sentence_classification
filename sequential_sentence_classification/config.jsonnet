@@ -12,26 +12,25 @@ local boolToInt(s) =
   "random_seed": std.parseInt(std.extVar("SEED")),
   "pytorch_seed": std.parseInt(std.extVar("PYTORCH_SEED")),
   "numpy_seed": std.parseInt(std.extVar("NUMPY_SEED")),
-  "dataset_reader":{
-    "type":"SeqClassificationReader",
-    "lazy": false,
-    "sent_max_len": std.parseInt(std.extVar("SENT_MAX_LEN")),
-    "max_sent_per_example": std.parseInt(std.extVar("MAX_SENT_PER_EXAMPLE")),
-    "tokenizer":{
+  "dataset_reader" : {
+        "type": "SeqClassificationReader",
+        "tokenizer": {
             "type": "pretrained_transformer",
             "model_name": std.extVar("BERT_MODEL"),
-            "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
+        },
+        "token_indexers": {
+            "bert": {
+                "type": "pretrained_transformer",
+                "model_name": std.extVar("BERT_MODEL"),
+            }
+        },
+        "sent_max_len": 10,
+        "max_sent_per_example": 80,
+        "use_sep": 1,
+        "sci_sum": 0,
+        "use_abstract_scores": 0,
+        "sci_sum_fake_scores": 0,
     },
-    "token_indexers": {
-          "type": "pretrained_transformer",
-          "model_name": std.extVar("BERT_MODEL"),
-          "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
-    },
-    "use_sep": stringToBool(std.extVar("USE_SEP")),
-    "sci_sum": stringToBool(std.extVar("SCI_SUM")),
-    "use_abstract_scores": stringToBool(std.extVar("USE_ABSTRACT_SCORES")),
-    "sci_sum_fake_scores": stringToBool(std.extVar("SCI_SUM_FAKE_SCORES")),
-  },
   "train_data_path": std.extVar("TRAIN_PATH"),
   "validation_data_path": std.extVar("DEV_PATH"),
   "test_data_path": std.extVar("TEST_PATH"),

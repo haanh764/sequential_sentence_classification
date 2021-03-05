@@ -96,7 +96,18 @@ class SeqClassificationModel(Model):
         # embedded_sentences: batch_size, num_sentences, sentence_length, embedding_size
         embedded_sentences = self.text_field_embedder(sentences)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
-        batch_size, num_sentences, _, _ = embedded_sentences.size()
+        batch_size, num_sentences, sentence_le, _ = embedded_sentences.size()
+        print("num_sentences ", num_sentences)
+        print("sentence_length ", sentence_le)
+        print("length padded seq 0,0,: ", len(sentences['bert'][0,0,:]))
+        res="\n"
+        tok="\n"
+        for i in sentences['bert'][0,0,:].tolist():
+            if i !=0:
+                res += f"{self.vocab.get_token_from_index(namespace = 'bert', index = i)}\t"
+                tok += f"{i}\t"
+        print(res)
+        print(tok)
 
         if self.use_sep:
             # The following code collects vectors of the SEP tokens from all the examples in the batch,

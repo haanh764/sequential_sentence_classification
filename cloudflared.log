@@ -1,0 +1,35 @@
+{"level":"info","time":"2021-03-05T13:34:11Z","message":"Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]"}
+{"level":"info","time":"2021-03-05T13:34:11Z","message":"Version 2021.2.5"}
+{"level":"info","time":"2021-03-05T13:34:11Z","message":"GOOS: linux, GOVersion: devel +11087322f8 Fri Nov 13 03:04:52 2020 +0100, GoArch: amd64"}
+{"level":"info","time":"2021-03-05T13:34:11Z","message":"Settings: map[logfile:./cloudflared.log metrics:localhost:45678 url:ssh://localhost:22]"}
+{"level":"info","autoupdateFreq":86400000,"time":"2021-03-05T13:34:11Z","message":"Autoupdate frequency is set"}
+{"level":"info","time":"2021-03-05T13:34:11Z","message":"Initial protocol h2mux"}
+{"level":"info","time":"2021-03-05T13:34:11Z","message":"Starting metrics server on 127.0.0.1:45678/metrics"}
+{"level":"info","connIndex":0,"location":"MAD","time":"2021-03-05T13:34:12Z","message":"Connection established"}
+{"level":"info","time":"2021-03-05T13:34:13Z","message":"Each HA connection's tunnel IDs: map[0:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g]"}
+{"level":"info","time":"2021-03-05T13:34:13Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:13Z","message":"|  Your free tunnel has started! Visit it:                         |"}
+{"level":"info","time":"2021-03-05T13:34:13Z","message":"|    https://commonly-pupils-letting-appearance.trycloudflare.com  |"}
+{"level":"info","time":"2021-03-05T13:34:13Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:13Z","message":"Route propagating, it may take up to 1 minute for your new route to become functional"}
+{"level":"info","connIndex":1,"location":"CDG","time":"2021-03-05T13:34:13Z","message":"Connection established"}
+{"level":"info","connIndex":2,"location":"MAD","time":"2021-03-05T13:34:14Z","message":"Connection established"}
+{"level":"info","time":"2021-03-05T13:34:15Z","message":"Each HA connection's tunnel IDs: map[0:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g 1:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g]"}
+{"level":"info","time":"2021-03-05T13:34:15Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:15Z","message":"|  Your free tunnel has started! Visit it:                         |"}
+{"level":"info","time":"2021-03-05T13:34:15Z","message":"|    https://commonly-pupils-letting-appearance.trycloudflare.com  |"}
+{"level":"info","time":"2021-03-05T13:34:15Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:15Z","message":"Route propagating, it may take up to 1 minute for your new route to become functional"}
+{"level":"info","connIndex":3,"location":"CDG","time":"2021-03-05T13:34:15Z","message":"Connection established"}
+{"level":"info","time":"2021-03-05T13:34:16Z","message":"Each HA connection's tunnel IDs: map[0:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g 1:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g 2:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g]"}
+{"level":"info","time":"2021-03-05T13:34:16Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:16Z","message":"|  Your free tunnel has started! Visit it:                         |"}
+{"level":"info","time":"2021-03-05T13:34:16Z","message":"|    https://commonly-pupils-letting-appearance.trycloudflare.com  |"}
+{"level":"info","time":"2021-03-05T13:34:16Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:16Z","message":"Route propagating, it may take up to 1 minute for your new route to become functional"}
+{"level":"info","time":"2021-03-05T13:34:17Z","message":"Each HA connection's tunnel IDs: map[0:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g 1:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g 2:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g 3:i2ydcy9edrhbgrrix1z8v7ii18rgczi6u8uidhc05l73bhavrd2g]"}
+{"level":"info","time":"2021-03-05T13:34:17Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:17Z","message":"|  Your free tunnel has started! Visit it:                         |"}
+{"level":"info","time":"2021-03-05T13:34:17Z","message":"|    https://commonly-pupils-letting-appearance.trycloudflare.com  |"}
+{"level":"info","time":"2021-03-05T13:34:17Z","message":"+------------------------------------------------------------------+"}
+{"level":"info","time":"2021-03-05T13:34:17Z","message":"Route propagating, it may take up to 1 minute for your new route to become functional"}

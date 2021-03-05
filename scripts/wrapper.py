@@ -1,35 +1,3 @@
-Skip to content
-Search or jump to…
-
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@UrszulaCzerwinska 
-UrszulaCzerwinska
-/
-sequential_sentence_classification
-forked from allenai/sequential_sentence_classification
-0
-0
-9
-Code
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-Settings
-sequential_sentence_classification/scripts/wrapper_script.py /
-@UrszulaCzerwinska
-UrszulaCzerwinska working with bad scores for no sep
-Latest commit a250133 20 hours ago
- History
- 1 contributor
-68 lines (49 sloc)  1.8 KB
-  
 import json
 import shutil
 import sys
@@ -99,15 +67,3 @@ sys.argv = [
     ]
 
 main()
-© 2021 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About

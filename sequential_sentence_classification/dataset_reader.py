@@ -70,10 +70,14 @@ class SeqClassificationReader(DatasetReader):
             sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]]
         else:
             # Tokenize the sentences
-            sentences = [
-                self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]
-                for sentence_text in sentences
-            ]
+            tok_sentences = []
+            for sentence_text in sentences:
+                if len(self._tokenizer.tokenize(sentence_text)) > self.sent_max_len:
+                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+ [Token("[SEP]")])
+                else:
+                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len])
+            
+            sentences = tok_sentences
 
         fields: Dict[str, Field] = {}
         fields["sentences"] = ListField([

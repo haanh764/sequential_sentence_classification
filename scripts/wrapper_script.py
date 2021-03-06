@@ -11,7 +11,7 @@ os.environ["NUMPY_SEED"] = "1527"
 
 
 # path to bert vocab and weights
-os.environ["BERT_MODEL"] = "allenai/scibert_scivocab_cased"
+os.environ["BERT_MODEL"] = "allenai/scibert_scivocab_uncased"
 
 # path to dataset files
 os.environ["TRAIN_PATH"] = "data/CSAbstruct/train.jsonl"
@@ -21,20 +21,15 @@ os.environ["TEST_PATH"] = "data/CSAbstruct/test.jsonl"
 
 # model
 os.environ["USE_SEP"] = "false"
-os.environ["WITH_CRF"] = "false"
+os.environ["WITH_CRF"] = "true"
 
 # training params
 os.environ["cuda_device"] = "0"
 os.environ["BATCH_SIZE"] = "4"
-os.environ["LR"] = "5e-5"
+os.environ["LR"] = "1e-5"
 os.environ["TRAINING_DATA_INSTANCES"] = "52"
 
-os.environ["NUM_EPOCHS"] = "100"
-
-
-# limit number of sentneces per examples, and number of words per sentence. This is dataset dependant
-os.environ["MAX_SENT_PER_EXAMPLE"] = "10"
-os.environ["SENT_MAX_LEN"] = "80"
+os.environ["NUM_EPOCHS"] = "10"
 
 
 # this is for the evaluation of the summarization dataset

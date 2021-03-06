@@ -62,7 +62,7 @@ class SeqClassificationModel(Model):
         ff_in_dim = encoded_senetence_dim if self.use_sep else self_attn.get_output_dim()
         ff_in_dim += self.additional_feature_size
 
-        self.time_distributed_aggregate_feedforward = TimeDistributed(Linear(ff_in_dim, self.num_labels))
+        self.time_distributed_aggregate_feedforward = Linear(ff_in_dim, self.num_labels)
 
         if self.with_crf:
             self.crf = ConditionalRandomField(
@@ -93,16 +93,25 @@ class SeqClassificationModel(Model):
         # Input: sentences
         # Output: embedded_sentences
 
-        # embedded_sentences: batch_size, num_sentences, embedding_size
+        # embedded_sentences: batch_size, num_sentences, n tokens sentence (with padding), embedding_size
         embedded_sentences = self.text_field_embedder(sentences, num_wrapping_dims=1)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
         batch_size, num_sentences, _, _ = embedded_sentences.size()
+
+        res="\n"
+        tok="\n"
+        for i in sentences['bert']["token_ids"][0,0,:].tolist():
+            if i !=0:
+                res += f"{self.vocab.get_token_from_index(namespace = 'tags', index = i)}\t"
+                tok += f"{i}\t"
+       # print(res)
+       # print(tok)
 
         if self.use_sep:
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
             # and arrange them in one list. It does the same for the labels and confidences.
             # TODO: replace 103 with '[SEP]'
-            sentences_mask = sentences['bert']["token_ids"] == 102  # mask for all the SEP tokens in the batch
+            sentences_mask = sentences['bert']["token_ids"] == 103  # mask for all the SEP tokens in the batch
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
                                                                         # returns num_sentences_per_batch x vector_len
             assert embedded_sentences.dim() == 2

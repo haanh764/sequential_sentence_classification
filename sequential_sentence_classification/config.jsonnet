@@ -24,8 +24,8 @@ local boolToInt(s) =
                 "model_name": std.extVar("BERT_MODEL"),
             }
         },
-        "sent_max_len": 10,
-        "max_sent_per_example": 80,
+        "sent_max_len": 80,
+        "max_sent_per_example": 10,
         "use_sep": 0,
         "sci_sum": 0,
         "use_abstract_scores": 0,
@@ -54,29 +54,26 @@ local boolToInt(s) =
     "self_attn": {
       "type": "pytorch_transformer",
       "input_dim": 768,
-      "feedforward_hidden_dim": 50,
+      "feedforward_hidden_dim": 100,
       "num_layers": 2,
-      "num_attention_heads": 2,
+      "num_attention_heads": 3,
     },
   },
   "data_loader": {
         "batch_size": std.parseInt(std.extVar("BATCH_SIZE")),
-        "shuffle": false
+        "shuffle": true
   },
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,
     "patience": 5,
-    "validation_metric": if stringToBool(std.extVar("SCI_SUM")) then "-loss" else '+acc',
+    "validation_metric": '+acc',
     "cuda_device": std.parseInt(std.extVar("cuda_device")),
-    "num_gradient_accumulation_steps": 32, 
+    "num_gradient_accumulation_steps": 50, 
     "optimizer": {
       "type": "huggingface_adamw",
       "lr": std.parseJson(std.extVar("LR")),
       "weight_decay": 0.01,
-      "parameter_groups": [
-        [["bias", "LayerNorm.bias", "LayerNorm.weight"], {"weight_decay": 0.0}],
-      ],
     },
     "learning_rate_scheduler": {
       "type": "slanted_triangular",

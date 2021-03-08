@@ -104,14 +104,15 @@ class SeqClassificationModel(Model):
             if i !=0:
                 res += f"{self.vocab.get_token_from_index(namespace = 'tags', index = i)}\t"
                 tok += f"{i}\t"
-       # print(res)
-       # print(tok)
+        #print(res)
+        #print(tok)
 
         if self.use_sep:
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
             # and arrange them in one list. It does the same for the labels and confidences.
             # TODO: replace 103 with '[SEP]'
-            sentences_mask = sentences['bert']["token_ids"] == 103  # mask for all the SEP tokens in the batch
+            index_sep = int(self.vocab.get_token_index(token="[SEP]", namespace = "tags"))
+            sentences_mask = sentences['bert']["token_ids"] == index_sep # mask for all the SEP tokens in the batch
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
                                                                         # returns num_sentences_per_batch x vector_len
             assert embedded_sentences.dim() == 2

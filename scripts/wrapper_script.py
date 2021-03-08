@@ -20,7 +20,7 @@ os.environ["TEST_PATH"] = "data/CSAbstruct/test.jsonl"
 
 
 # model
-os.environ["USE_SEP"] = "false"
+os.environ["USE_SEP"] = "true"
 os.environ["WITH_CRF"] = "false"
 
 # training params
@@ -31,6 +31,7 @@ os.environ["STEPS_PER_EPOCH"] = "52"
 
 os.environ["NUM_EPOCHS"] = "2"
 
+os.environ["SENTENCE_LENGTH"] = "512"
 
 # this is for the evaluation of the summarization dataset
 os.environ["SCI_SUM"] = "false"
@@ -41,6 +42,9 @@ config_file = "sequential_sentence_classification/config.jsonnet"
 
 # Use overrides to train on CPU.
 overrides = json.dumps({"trainer": {"cuda_device": -1}})
+
+
+os.environ["SCI_SUM_FAKE_SCORES"] = "false"
 
 serialization_dir = "/tmp/debugger_train"
 

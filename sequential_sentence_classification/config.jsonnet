@@ -17,11 +17,13 @@ local boolToInt(s) =
         "tokenizer": {
             "type": "pretrained_transformer",
             "model_name": std.extVar("BERT_MODEL"),
+            "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
         },
         "token_indexers": {
             "bert": {
                 "type": "pretrained_transformer",
                 "model_name": std.extVar("BERT_MODEL"),
+                "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
             }
         },
         "sent_max_len": 80,
@@ -42,7 +44,9 @@ local boolToInt(s) =
             "bert": {
               "type": "pretrained_transformer",
               "model_name": std.extVar("BERT_MODEL"),
-              "tokenizer_kwargs":{"truncation_strategy": 'do_not_truncate'},
+              "train_parameters": 1,
+              "last_layer_only": 1,
+
         }
         }
     },
@@ -78,7 +82,6 @@ local boolToInt(s) =
     "learning_rate_scheduler": {
       "type": "slanted_triangular",
       "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
-      "num_steps_per_epoch":std.parseInt(std.extVar("STEPS_PER_EPOCH")),
       "cut_frac": 0.1,
     },
   }

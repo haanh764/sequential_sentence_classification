@@ -11,8 +11,10 @@ os.environ["NUMPY_SEED"] = "1527"
 
 
 # path to bert vocab and weights
-os.environ["BERT_MODEL"] = "allenai/scibert_scivocab_uncased"
-
+#os.environ["BERT_MODEL"] = "allenai/scibert_scivocab_uncased"
+os.environ["BERT_MODEL"] = "roberta-base"
+os.environ["TOKEN"] = "</s>"
+os.environ["MODEL_TYPE"] = "roberta"
 # path to dataset files
 os.environ["TRAIN_PATH"] = "data/CSAbstruct/train.jsonl"
 os.environ["DEV_PATH"] = "data/CSAbstruct/dev.jsonl"
@@ -25,7 +27,7 @@ os.environ["WITH_CRF"] = "false"
 
 # training params
 os.environ["cuda_device"] = "0"
-os.environ["BATCH_SIZE"] = "4"
+os.environ["BATCH_SIZE"] = "1"
 os.environ["LR"] = "1e-5"
 os.environ["STEPS_PER_EPOCH"] = "52"
 

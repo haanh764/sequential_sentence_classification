@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 import torch
+import numpy as np
 from torch.nn import Linear
 from allennlp.data import Vocabulary
 from allennlp.models.model import Model
@@ -26,6 +27,8 @@ class SeqClassificationModel(Model):
                  bert_dropout: float = 0.1,
                  sci_sum: bool = False,
                  additional_feature_size: int = 0,
+                 intersentence_token: str = "[SEP]",
+                 model_type: str = "bert"
                  ) -> None:
         super(SeqClassificationModel, self).__init__(vocab)
 
@@ -36,6 +39,8 @@ class SeqClassificationModel(Model):
         self.sci_sum = sci_sum
         self.self_attn = self_attn
         self.additional_feature_size = additional_feature_size
+        self.token = intersentence_token
+        self.model_type = model_type
 
         self.dropout = torch.nn.Dropout(p=bert_dropout)
 
@@ -94,14 +99,14 @@ class SeqClassificationModel(Model):
         # Output: embedded_sentences
 
         # embedded_sentences: batch_size, num_sentences, n tokens sentence (with padding), embedding_size
-        embedded_sentences = self.text_field_embedder(sentences, num_wrapping_dims=1)
+        embedded_sentences = self.text_field_embedder(sentences, num_wrapping_dims= 1)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
         batch_size, num_sentences, _, _ = embedded_sentences.size()
 
         res="\n"
         tok="\n"
         for i in sentences['bert']["token_ids"][0,0,:].tolist():
-            if i !=0:
+            if i !=1:
                 res += f"{self.vocab.get_token_from_index(namespace = 'tags', index = i)}\t"
                 tok += f"{i}\t"
         #print(res)
@@ -110,11 +115,16 @@ class SeqClassificationModel(Model):
         if self.use_sep:
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
             # and arrange them in one list. It does the same for the labels and confidences.
-            # TODO: replace 103 with '[SEP]'
-            index_sep = int(self.vocab.get_token_index(token="[SEP]", namespace = "tags"))
+            index_sep = int(self.vocab.get_token_index(token=self.token, namespace = "tags"))
             sentences_mask = sentences['bert']["token_ids"] == index_sep # mask for all the SEP tokens in the batch
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
-                                                                        # returns num_sentences_per_batch x vector_len
+                                                                    # returns num_sentences_per_batch x vector_len
+            ## roberta only
+            if self.model_type == "roberta" :                                                           
+                indx = np.arange(embedded_sentences.shape[0])
+                sel_idx = torch.from_numpy(indx[indx%2==0]) # select only scond intersentence marker
+                embedded_sentences = torch.index_select(embedded_sentences, 0, sel_idx)
+                                                            
             assert embedded_sentences.dim() == 2
             num_sentences = embedded_sentences.shape[0]
             # for the rest of the code in this model to work, think of the data we have as one example

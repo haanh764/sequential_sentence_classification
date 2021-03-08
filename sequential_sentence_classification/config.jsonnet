@@ -51,6 +51,8 @@ local boolToInt(s) =
         }
     },
     "use_sep": stringToBool(std.extVar("USE_SEP")),
+    "intersentence_token":std.extVar("TOKEN"),
+    "model_type":std.extVar("MODEL_TYPE"),
     "with_crf": stringToBool(std.extVar("WITH_CRF")),
     "bert_dropout": 0.1,
     "sci_sum": stringToBool(std.extVar("SCI_SUM")),

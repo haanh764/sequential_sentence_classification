@@ -73,7 +73,7 @@ class SeqClassificationReader(DatasetReader):
                     tokenized_sentences.append(self._tokenizer.tokenize(s)[1:self.sent_max_len]+self._tokenizer.sequence_pair_mid_tokens)
                 else:
                     tokenized_sentences.append(self._tokenizer.tokenize(s)[1:-1]+self._tokenizer.sequence_pair_mid_tokens)
-            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]+self._tokenizer.sequence_pair_end_tokens]
+            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]]
            
             sentences_tt = [str(tok) for tok in sentences]
             start_words = "[[CLS], this, paper, extends, previous"

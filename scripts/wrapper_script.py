@@ -21,15 +21,15 @@ os.environ["TEST_PATH"] = "data/CSAbstruct/test.jsonl"
 
 # model
 os.environ["USE_SEP"] = "false"
-os.environ["WITH_CRF"] = "true"
+os.environ["WITH_CRF"] = "false"
 
 # training params
 os.environ["cuda_device"] = "0"
 os.environ["BATCH_SIZE"] = "4"
 os.environ["LR"] = "1e-5"
-os.environ["TRAINING_DATA_INSTANCES"] = "52"
+os.environ["STEPS_PER_EPOCH"] = "52"
 
-os.environ["NUM_EPOCHS"] = "10"
+os.environ["NUM_EPOCHS"] = "2"
 
 
 # this is for the evaluation of the summarization dataset

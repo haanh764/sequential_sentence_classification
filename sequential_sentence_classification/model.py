@@ -111,7 +111,7 @@ class SeqClassificationModel(Model):
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
             # and arrange them in one list. It does the same for the labels and confidences.
             # TODO: replace 103 with '[SEP]'
-            index_sep = int(self.vocab.get_token_index(token=self._tokenizer.sequence_pair_mid_tokens, namespace = "tags"))
+            index_sep = int(self.vocab.get_token_index(token="[SEP]", namespace = "tags"))
             sentences_mask = sentences['bert']["token_ids"] == index_sep # mask for all the SEP tokens in the batch
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
                                                                         # returns num_sentences_per_batch x vector_len

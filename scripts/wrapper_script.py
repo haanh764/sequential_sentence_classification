@@ -62,6 +62,7 @@ sys.argv = [
     config_file,
     "-s", serialization_dir,
     "--include-package", "sequential_sentence_classification",
+    "-o", overrides,
     ]
 
 main()

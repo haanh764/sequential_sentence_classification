@@ -66,20 +66,20 @@ class SeqClassificationReader(DatasetReader):
             assert len(sentences) == len(additional_features)
 
         if self.use_sep:
-            tokenized_sentences = [[self._tokenizer.sequence_pair_start_tokens]]
+            tokenized_sentences = [self._tokenizer.sequence_pair_start_tokens]
             origin_sent = len(sentences)
             for s in sentences:
                 if len(self._tokenizer.tokenize(s)) > self.sent_max_len:
-                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:self.sent_max_len]+[self._tokenizer.sequence_pair_mid_tokens])
+                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:self.sent_max_len]+self._tokenizer.sequence_pair_mid_tokens)
                 else:
-                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:])
-            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))]
+                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:-1]+self._tokenizer.sequence_pair_mid_tokens)
+            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]+self._tokenizer.sequence_pair_end_tokens]
            
             sentences_tt = [str(tok) for tok in sentences]
             start_words = "[[CLS], this, paper, extends, previous"
             toto = "aaa"
             if len(sentences[0]) > 512:
-                sentences = [sentences[0][0:511] + [self._tokenizer.sequence_pair_mid_tokens]]
+                sentences = [sentences[0][0:511] + self._tokenizer.sequence_pair_end_tokens]
 
             n_sent = sentences_tt[0].count("SEP")
 
@@ -88,7 +88,7 @@ class SeqClassificationReader(DatasetReader):
             tok_sentences = []
             for sentence_text in sentences:
                 if len(self._tokenizer.tokenize(sentence_text)) > self.sent_max_len:
-                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+ [self._tokenizer.sequence_pair_mid_tokens])
+                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+[self._tokenizer.sequence_pair_end_tokens])
                 else:
                     tok_sentences.append(self._tokenizer.tokenize(sentence_text))
             

@@ -26,10 +26,10 @@ local boolToInt(s) =
         },
         "sent_max_len": 80,
         "max_sent_per_example": 10,
-        "use_sep": 0,
-        "sci_sum": 0,
-        "use_abstract_scores": 0,
-        "sci_sum_fake_scores": 0,
+        "use_sep": stringToBool(std.extVar("USE_SEP")),
+        "sci_sum": stringToBool(std.extVar("SCI_SUM")),
+        "use_abstract_scores": boolToInt(stringToBool(std.extVar("USE_ABSTRACT_SCORES"))),
+        "sci_sum_fake_scores": boolToInt(stringToBool(std.extVar("SCI_SUM_FAKE_SCORES"))),
     },
   "train_data_path": std.extVar("TRAIN_PATH"),
   "validation_data_path": std.extVar("DEV_PATH"),
@@ -78,7 +78,7 @@ local boolToInt(s) =
     "learning_rate_scheduler": {
       "type": "slanted_triangular",
       "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
-      "num_steps_per_epoch":std.parseInt(std.extVar("TRAINING_DATA_INSTANCES")),
+      "num_steps_per_epoch":std.parseInt(std.extVar("STEPS_PER_EPOCH")),
       "cut_frac": 0.1,
     },
   }

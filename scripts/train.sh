@@ -13,17 +13,17 @@ export DEV_PATH=data/CSAbstruct/dev.jsonl
 export TEST_PATH=data/CSAbstruct/test.jsonl
 
 # model
-export USE_SEP=false  # true for our model. false for baseline
+export USE_SEP=true  # true for our model. false for baseline
 export WITH_CRF=false  # CRF only works for the baseline
 
 # training params
 export cuda_device=0
-export BATCH_SIZE=2
+export BATCH_SIZE=4
 export LR=1e-5
 #export TRAINING_DATA_INSTANCES=
 export STEPS_PER_EPOCH=52 
 #1668 /32
-export NUM_EPOCHS=8
+export NUM_EPOCHS=30
 
 # limit number of sentneces per examples, and number of words per sentence. This is dataset dependant
 

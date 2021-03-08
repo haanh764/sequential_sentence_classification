@@ -45,7 +45,7 @@ local boolToInt(s) =
               "type": "pretrained_transformer",
               "model_name": std.extVar("BERT_MODEL"),
               "train_parameters": 1,
-              "last_layer_only": 1,
+              "last_layer_only": 0,
 
         }
         }
@@ -60,7 +60,7 @@ local boolToInt(s) =
       "input_dim": 768,
       "feedforward_hidden_dim": 100,
       "num_layers": 2,
-      "num_attention_heads": 3,
+      "num_attention_heads": 2,
     },
   },
   "data_loader": {

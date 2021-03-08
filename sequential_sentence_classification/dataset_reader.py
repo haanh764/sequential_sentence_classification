@@ -66,11 +66,11 @@ class SeqClassificationReader(DatasetReader):
             assert len(sentences) == len(additional_features)
 
         if self.use_sep:
-            tokenized_sentences = [[Token("[CLS]")]]
+            tokenized_sentences = [[self._tokenizer.sequence_pair_start_tokens]]
             origin_sent = len(sentences)
             for s in sentences:
                 if len(self._tokenizer.tokenize(s)) > self.sent_max_len:
-                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:self.sent_max_len]+[Token("[SEP]")])
+                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:self.sent_max_len]+[self._tokenizer.sequence_pair_mid_tokens])
                 else:
                     tokenized_sentences.append(self._tokenizer.tokenize(s)[1:])
             sentences = [list(itertools.chain.from_iterable(tokenized_sentences))]
@@ -79,7 +79,7 @@ class SeqClassificationReader(DatasetReader):
             start_words = "[[CLS], this, paper, extends, previous"
             toto = "aaa"
             if len(sentences[0]) > 512:
-                sentences = [sentences[0][0:511] + [Token("[SEP]")]]
+                sentences = [sentences[0][0:511] + [self._tokenizer.sequence_pair_mid_tokens]]
 
             n_sent = sentences_tt[0].count("SEP")
 
@@ -88,7 +88,7 @@ class SeqClassificationReader(DatasetReader):
             tok_sentences = []
             for sentence_text in sentences:
                 if len(self._tokenizer.tokenize(sentence_text)) > self.sent_max_len:
-                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+ [Token("[SEP]")])
+                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+ [self._tokenizer.sequence_pair_mid_tokens])
                 else:
                     tok_sentences.append(self._tokenizer.tokenize(sentence_text))
             

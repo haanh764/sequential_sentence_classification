@@ -26,7 +26,7 @@ local boolToInt(s) =
                 "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
             }
         },
-        "sent_max_len": 80,
+        "sent_max_len": std.parseInt(std.extVar("SENT_MAX_LEN")),
         "max_sent_per_example": 10,
         "use_sep": stringToBool(std.extVar("USE_SEP")),
         "sci_sum": stringToBool(std.extVar("SCI_SUM")),
@@ -45,7 +45,7 @@ local boolToInt(s) =
               "type": "pretrained_transformer",
               "model_name": std.extVar("BERT_MODEL"),
               "train_parameters": 1,
-              "last_layer_only": 0,
+              "last_layer_only": 1,
 
         }
         }
@@ -72,8 +72,8 @@ local boolToInt(s) =
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,
-    "patience": 5,
-    "validation_metric": '+acc',
+    "patience": 10,
+    "validation_metric": '+avgF',
     "cuda_device": std.parseInt(std.extVar("cuda_device")),
     "num_gradient_accumulation_steps": 50, 
     "optimizer": {

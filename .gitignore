@@ -3,3 +3,4 @@ tmp
 .vscode
 /run*
 cloudflared*
+data/zonage-train/

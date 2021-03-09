@@ -28,7 +28,7 @@ class SeqClassificationModel(Model):
                  sci_sum: bool = False,
                  additional_feature_size: int = 0,
                  intersentence_token: str = "[SEP]",
-                 model_type: str = "bert"
+                 model_type: str = "bert",
                  ) -> None:
         super(SeqClassificationModel, self).__init__(vocab)
 
@@ -106,7 +106,7 @@ class SeqClassificationModel(Model):
         res="\n"
         tok="\n"
         for i in sentences['bert']["token_ids"][0,0,:].tolist():
-            if i !=1:
+            if i !=1 and i != 3:
                 res += f"{self.vocab.get_token_from_index(namespace = 'tags', index = i)}\t"
                 tok += f"{i}\t"
         #print(res)
@@ -122,7 +122,8 @@ class SeqClassificationModel(Model):
             ## roberta only
             if self.model_type == "roberta" :                                                           
                 indx = np.arange(embedded_sentences.shape[0])
-                sel_idx = torch.from_numpy(indx[indx%2==0]) # select only scond intersentence marker
+                device = "cuda" 
+                sel_idx = torch.from_numpy(indx[indx%2==0]).to(device)# select only scond intersentence marker
                 embedded_sentences = torch.index_select(embedded_sentences, 0, sel_idx)
                                                             
             assert embedded_sentences.dim() == 2
@@ -217,7 +218,10 @@ class SeqClassificationModel(Model):
             flattened_gold = labels.contiguous().view(-1)
 
             if not self.with_crf:
-                label_loss = self.loss(flattened_logits.squeeze(), flattened_gold)
+                if flattened_logits.shape[0] == 1:
+                    label_loss = self.loss(flattened_logits, flattened_gold)
+                else:                
+                    label_loss = self.loss(flattened_logits.squeeze(), flattened_gold)
                 if confidences is not None:
                     label_loss = label_loss * confidences.type_as(label_loss).view(-1)
                 label_loss = label_loss.mean()
@@ -235,7 +239,10 @@ class SeqClassificationModel(Model):
 
             if not self.labels_are_scores:
                 evaluation_mask = (flattened_gold != -1)
-                self.label_accuracy(flattened_probs.float().contiguous(), flattened_gold.squeeze(-1), mask=evaluation_mask)
+                if flattened_probs.shape[0] == 1:
+                    self.label_accuracy(flattened_probs.float().contiguous(), flattened_gold, mask=evaluation_mask)
+                else:
+                    self.label_accuracy(flattened_probs.float().contiguous(), flattened_gold.squeeze(-1), mask=evaluation_mask)
 
                 # compute F1 per label
                 for label_index in range(self.num_labels):

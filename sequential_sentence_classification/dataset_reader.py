@@ -88,7 +88,7 @@ class SeqClassificationReader(DatasetReader):
             tok_sentences = []
             for sentence_text in sentences:
                 if len(self._tokenizer.tokenize(sentence_text)) > self.sent_max_len:
-                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+[self._tokenizer.sequence_pair_end_tokens])
+                    tok_sentences.append(self._tokenizer.tokenize(sentence_text)[:self.sent_max_len]+self._tokenizer.sequence_pair_end_tokens)
                 else:
                     tok_sentences.append(self._tokenizer.tokenize(sentence_text))
             

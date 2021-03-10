@@ -30,8 +30,8 @@ local boolToInt(s) =
         "max_sent_per_example": 10,
         "use_sep": stringToBool(std.extVar("USE_SEP")),
         "sci_sum": stringToBool(std.extVar("SCI_SUM")),
-        "use_abstract_scores": boolToInt(stringToBool(std.extVar("USE_ABSTRACT_SCORES"))),
-        "sci_sum_fake_scores": boolToInt(stringToBool(std.extVar("SCI_SUM_FAKE_SCORES"))),
+        "use_abstract_scores": stringToBool(std.extVar("USE_ABSTRACT_SCORES")),
+        "sci_sum_fake_scores": stringToBool(std.extVar("SCI_SUM_FAKE_SCORES")),
     },
   "train_data_path": std.extVar("TRAIN_PATH"),
   "validation_data_path": std.extVar("DEV_PATH"),
@@ -67,13 +67,13 @@ local boolToInt(s) =
   },
   "data_loader": {
         "batch_size": std.parseInt(std.extVar("BATCH_SIZE")),
-        "shuffle": true
+        "shuffle": false,
   },
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,
     "patience": 10,
-    "validation_metric": '+avgF',
+    "validation_metric": std.extVar("METRIC"),
     "cuda_device": std.parseInt(std.extVar("cuda_device")),
     "num_gradient_accumulation_steps": 50, 
     "optimizer": {

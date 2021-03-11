@@ -16,8 +16,8 @@ os.environ["BERT_MODEL"] = "allenai/scibert_scivocab_uncased"
 #os.environ["BERT_MODEL"] = "camembert-base"
 
 
-#os.environ["TOKEN"] = "</s>"
-#os.environ["MODEL_TYPE"] = "roberta"
+# os.environ["TOKEN"] = "</s>"
+# os.environ["MODEL_TYPE"] = "roberta"
 
 os.environ["TOKEN"] = "[SEP]"
 os.environ["MODEL_TYPE"] = "bert"
@@ -39,18 +39,18 @@ os.environ["TEST_PATH"] = "data/CSAbstruct/test.jsonl"
 # os.environ["TEST_PATH"] = "data/zonage-train/test.jsonl"
 
 # model
-os.environ["USE_SEP"] = "false"
-os.environ["WITH_CRF"] = "true"
+os.environ["USE_SEP"] = "true"
+os.environ["WITH_CRF"] = "false"
 
 # training params
 os.environ["cuda_device"] = "0"
-os.environ["BATCH_SIZE"] = "2"
+os.environ["BATCH_SIZE"] = "4"
 os.environ["LR"] = "1e-5"
-os.environ["STEPS_PER_EPOCH"] = "55"
+os.environ["STEPS_PER_EPOCH"] = "56"
 
-os.environ["NUM_EPOCHS"] = "30"
+os.environ["NUM_EPOCHS"] = "1"
 
-os.environ["SENT_MAX_LEN"] = "300"
+os.environ["SENT_MAX_LEN"] = "80"
 
 # this is for the evaluation of the summarization dataset
 os.environ["SCI_SUM"] = "false"

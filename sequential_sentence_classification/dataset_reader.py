@@ -2,7 +2,7 @@ import itertools
 import json
 from typing import Dict, List
 from overrides import overrides
-
+import copy
 import numpy as np
 
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
@@ -72,24 +72,16 @@ class SeqClassificationReader(DatasetReader):
             assert len(sentences) == len(additional_features)
 
         if self.use_sep:
-            origin_sent = sentences
-            tokenized_sentences = [self._tokenizer.sequence_pair_start_tokens]
-            for s in sentences:
-                if len(self._tokenizer.tokenize(s)) > self.sent_max_len:
-                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:self.sent_max_len]+self._tokenizer.sequence_pair_mid_tokens)
-                else:
-                    tokenized_sentences.append(self._tokenizer.tokenize(s)[1:-1]+self._tokenizer.sequence_pair_mid_tokens)
-            sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]]
+            origin_sent = copy.deepcopy(sentences)
+            sentences = self.shorten_sentences(sentences, self.sent_max_len)
     
-            if len(sentences[0]) > 512:
-                n = int((len(sentences[0])-512)/ len(origin_sent))
-                tokenized_sentences = [self._tokenizer.sequence_pair_start_tokens]
-                for s in origin_sent:
-                    if len(self._tokenizer.tokenize(s)) > (self.sent_max_len-n):
-                        tokenized_sentences.append(self._tokenizer.tokenize(s)[1:(self.sent_max_len-n)]+self._tokenizer.sequence_pair_mid_tokens)
-                    else:
-                        tokenized_sentences.append(self._tokenizer.tokenize(s)[1:-1]+self._tokenizer.sequence_pair_mid_tokens)
-                    sentences = [list(itertools.chain.from_iterable(tokenized_sentences))[:-1]]
+            max_len=self.sent_max_len
+            while len(sentences[0]) > 512:
+                n = int((len(sentences[0])-512)/ len(origin_sent))+1
+                
+                max_len -= n
+                sentences = self.shorten_sentences(origin_sent, max_len )
+              
             
             assert len(sentences[0]) <= 512
 
@@ -133,6 +125,17 @@ class SeqClassificationReader(DatasetReader):
             fields["additional_features"] = ArrayField(np.array(additional_features))
 
         return Instance(fields)
+
+    def shorten_sentences(self, origin_sent, max_len):
+        
+        tokenized_sentences = [self._tokenizer.sequence_pair_start_tokens]
+        for s in origin_sent:
+            if len(self._tokenizer.tokenize(s)) > (max_len):
+                tokenized_sentences.append(self._tokenizer.tokenize(s)[1:(max_len)]+self._tokenizer.sequence_pair_mid_tokens)
+            else:
+                tokenized_sentences.append(self._tokenizer.tokenize(s)[1:-1]+self._tokenizer.sequence_pair_mid_tokens)
+        mid_tok_len = len(self._tokenizer.sequence_pair_mid_tokens)
+        return [list(itertools.chain.from_iterable(tokenized_sentences))[:-mid_tok_len]+self._tokenizer.sequence_pair_end_tokens]
 
     def apply_token_indexers(self, instance: Instance) -> None:
         for text_field in instance["sentences"].field_list:

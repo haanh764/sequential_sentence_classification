@@ -7,7 +7,6 @@ from allennlp.commands import main
 import os
 
 params_file = "./params/params_train.yml"
-metrics_file = "./metrics/metrics_eval_test.json"
 config_file = "sequential_sentence_classification/config.jsonnet"
 
 # this is for the evaluation of the summarization dataset
@@ -23,7 +22,7 @@ with open(params_file, 'r') as fd:
 
 serialization_dir = "./outputs/"+ params["model"]["name"]
 if os.path.exists(serialization_dir):
-  shutil.rmtree(serialization_dir)
+    shutil.rmtree(serialization_dir)
 os.mkdir(serialization_dir)
 model_path = serialization_dir + "/model.tar.gz"
 test_file = params["reader"]["test_path"]

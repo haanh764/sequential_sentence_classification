@@ -1,5 +1,7 @@
 __pycache__/
 tmp
 .vscode
-outputs/*
+outputs/*/*.tar.gz
+outputs/*/*.th
+outputs/*/vocabulary/
 .mypy_cache

@@ -27,5 +27,5 @@ trainer:
   accumulation_steps: "32"
   lr: "1e-5"
   weight_decay: "0.01"
-  n_epochs: "20"
+  n_epochs: "1"
   steps_per_epoch: "56"

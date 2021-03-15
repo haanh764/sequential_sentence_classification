@@ -1,0 +1,31 @@
+global:
+  seed: "15270"
+  use_sep: "true"
+  with_crf: "false"
+  cuda: "0"
+reader:
+  bert_model: "allenai/scibert_scivocab_uncased" #"roberta-base"
+  token: "[SEP]"
+  model_type: "bert"
+  train_path: "data/CSAbstruct/train.jsonl"
+  test_path: "data/CSAbstruct/test.jsonl"
+  dev_path: "data/CSAbstruct/dev.jsonl"
+  sent_max_len: "80"
+attention:
+  input_dim: "768"
+  feedforward_hidden_dim: "50"
+  num_layers: "2"
+  num_attention_heads: "2"
+model:
+  name: "bert_sep"
+  last_layer_only: "true"
+  train_parameters: "true"
+  batch_size: "4"
+trainer:
+  metric: "+acc" #"+avgF", "-loss"
+  patience: "5"
+  accumulation_steps: "32"
+  lr: "1e-5"
+  weight_decay: "0.01"
+  n_epochs: "20"
+  steps_per_epoch: "56"

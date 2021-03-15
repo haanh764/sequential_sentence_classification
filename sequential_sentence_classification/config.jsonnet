@@ -44,8 +44,8 @@ local boolToInt(s) =
             "bert": {
               "type": "pretrained_transformer",
               "model_name": std.extVar("BERT_MODEL"),
-              "train_parameters": 1,
-              "last_layer_only": 1,
+              "train_parameters": stringToBool(std.extVar("TRAIN_PARAMS")),
+              "last_layer_only": stringToBool(std.extVar("LAST_LAYER_ONLY")),
 
         }
         }
@@ -59,32 +59,32 @@ local boolToInt(s) =
     "additional_feature_size": boolToInt(stringToBool(std.extVar("USE_ABSTRACT_SCORES"))),
     "self_attn": {
       "type": "pytorch_transformer",
-      "input_dim": 768,
-      "feedforward_hidden_dim": 50,
-      "num_layers": 2,
-      "num_attention_heads": 2,
+      "input_dim": std.parseInt(std.extVar("INPUT_DIM")),
+      "feedforward_hidden_dim": std.parseInt(std.extVar("HIDDEN_DIM")),
+      "num_layers": std.parseInt(std.extVar("NUM_LAYERS")),
+      "num_attention_heads": std.parseInt(std.extVar("NUM_ATT_HEADS")), 
     },
   },
   "data_loader": {
         "batch_size": std.parseInt(std.extVar("BATCH_SIZE")),
-        "shuffle": false,
+        "shuffle": true,
   },
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,
-    "patience": 5,
-    "validation_metric": if stringToBool(std.extVar("SCI_SUM")) then "-loss" else '+acc',
+    "patience": std.parseInt(std.extVar("PATIENCE")),
+    "validation_metric": std.extVar("METRIC"),
     "cuda_device": std.parseInt(std.extVar("cuda_device")),
-    "num_gradient_accumulation_steps": 32,
+    "num_gradient_accumulation_steps": std.parseInt(std.extVar("ACCUM_STEPS")),
     "optimizer": {
       "type": "huggingface_adamw",
       "lr": std.parseJson(std.extVar("LR")),
-      "weight_decay": 0.01,
+      "weight_decay": std.parseJson(std.extVar("WEIGHT_DECAY")),
     },
     "learning_rate_scheduler": {
       "type": "slanted_triangular",
       "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
-      "num_steps_per_epoch": std.parseInt(std.extVar("TRAINING_STEPS")),
+      "num_steps_per_epoch": std.parseInt(std.extVar("STEPS_PER_EPOCH")),
       "cut_frac": 0.1,
     },
   }

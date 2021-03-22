@@ -27,11 +27,6 @@ local boolToInt(s) =
             }
         },
         "sent_max_len": std.parseInt(std.extVar("SENT_MAX_LEN")),
-        "max_sent_per_example": 10,
-        "use_sep": stringToBool(std.extVar("USE_SEP")),
-        "sci_sum": stringToBool(std.extVar("SCI_SUM")),
-        "use_abstract_scores": stringToBool(std.extVar("USE_ABSTRACT_SCORES")),
-        "sci_sum_fake_scores": stringToBool(std.extVar("SCI_SUM_FAKE_SCORES")),
     },
   "train_data_path": std.extVar("TRAIN_PATH"),
   "validation_data_path": std.extVar("DEV_PATH"),
@@ -50,13 +45,12 @@ local boolToInt(s) =
         }
         }
     },
-    "use_sep": stringToBool(std.extVar("USE_SEP")),
     "with_crf": stringToBool(std.extVar("WITH_CRF")),
-    "intersentence_token":std.extVar("TOKEN"),
-    "model_type":std.extVar("MODEL_TYPE"),
-    "bert_dropout": 0.1,
-    "sci_sum": stringToBool(std.extVar("SCI_SUM")),
-    "additional_feature_size": boolToInt(stringToBool(std.extVar("USE_ABSTRACT_SCORES"))),
+    "encoder": {
+            "type": "bert_pooler",
+            "pretrained_model": std.extVar("BERT_MODEL"),
+            "requires_grad": true
+        },
     "self_attn": {
       "type": "pytorch_transformer",
       "input_dim": 768,
@@ -73,7 +67,7 @@ local boolToInt(s) =
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,
     "patience": 5,
-    "validation_metric": if stringToBool(std.extVar("SCI_SUM")) then "-loss" else '+acc',
+    "validation_metric":'+acc',
     "cuda_device": std.parseInt(std.extVar("cuda_device")),
     "num_gradient_accumulation_steps": 32,
     "optimizer": {

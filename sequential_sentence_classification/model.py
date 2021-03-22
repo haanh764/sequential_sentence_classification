@@ -6,7 +6,7 @@ import torch
 from torch.nn import Linear
 from allennlp.data import Vocabulary
 from allennlp.models.model import Model
-from allennlp.modules import TextFieldEmbedder, TimeDistributed, Seq2SeqEncoder
+from allennlp.modules import TextFieldEmbedder, TimeDistributed, Seq2SeqEncoder, Seq2VecEncoder
 from allennlp.nn.util import get_text_field_mask
 from allennlp.training.metrics import F1Measure, CategoricalAccuracy
 from allennlp.modules.conditional_random_field import ConditionalRandomField
@@ -21,18 +21,18 @@ class SeqClassificationModel(Model):
 
     def __init__(self, vocab: Vocabulary,
                  text_field_embedder: TextFieldEmbedder,
+                 encoder: Seq2VecEncoder = None,
                  with_crf: bool = False,
                  self_attn: Seq2SeqEncoder = None,
-                 additional_feature_size: int = 0,
                  ) -> None:
         super(SeqClassificationModel, self).__init__(vocab)
 
         self.text_field_embedder = text_field_embedder
         self.vocab = vocab
         self.with_crf = with_crf
+        self.encoder = encoder
         self.self_attn = self_attn
-        self.additional_feature_size = additional_feature_size
-        self.dropout = torch.nn.Dropout(p=bert_dropout)
+#        self.dropout = torch.nn.Dropout(p=bert_dropout)
 
 
         self.loss = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction='none')
@@ -46,12 +46,9 @@ class SeqClassificationModel(Model):
             label_name = self.vocab.get_token_from_index(namespace='labels', index=label_index)
             self.label_f1_metrics[label_name] = F1Measure(label_index)
 
-        encoded_senetence_dim = text_field_embedder._token_embedders['bert'].get_output_dim()
+        self.classifier = Linear(encoder.get_output_dim(), self.num_labels)
 
-        ff_in_dim = self_attn.get_output_dim()
-        ff_in_dim += self.additional_feature_size
-
-        self.time_distributed_aggregate_feedforward = Linear(ff_in_dim, self.num_labels)
+        self.attention = Linear(self_attn.get_output_dim(), self.num_labels)
 
         if self.with_crf:
             self.crf = ConditionalRandomField(
@@ -63,7 +60,6 @@ class SeqClassificationModel(Model):
                 sentences: torch.LongTensor,
                 labels: torch.IntTensor = None,
                 confidences: torch.Tensor = None,
-                additional_features: torch.Tensor = None,
                 ) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
         """
@@ -80,18 +76,15 @@ class SeqClassificationModel(Model):
         embedded_sentences = self.text_field_embedder(sentences, num_wrapping_dims= 1)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
         batch_size, num_sentences, _, _ = embedded_sentences.size()
+#        embedded_sentences = self.dropout(embedded_sentences)
+        
+        encoded_text = self.encoder(embedded_sentences, mask, num_wrapping_dims=1) # batch input output
+        batch_size, _, _ = encoded_text.size()
+        sent_mask = (mask.sum(dim=2) != 0) #?
 
-        # ['CLS'] token
-        embedded_sentences = embedded_sentences[:, :, 0, :]
-        embedded_sentences = self.dropout(embedded_sentences)
-        batch_size, num_sentences, _ = embedded_sentences.size()
-        sent_mask = (mask.sum(dim=2) != 0)
-        embedded_sentences = self.self_attn(embedded_sentences, sent_mask)
+        encoded_text_att = self.self_attn(encoded_text, sent_mask)
 
-        if additional_features is not None:
-            embedded_sentences = torch.cat((embedded_sentences, additional_features), dim=-1)
-
-        label_logits = self.time_distributed_aggregate_feedforward(embedded_sentences)
+        label_logits = self.attention(encoded_text_att)
         # label_logits: batch_size, num_sentences, num_labels
 
   

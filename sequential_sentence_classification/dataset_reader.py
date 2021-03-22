@@ -71,16 +71,14 @@ class SeqClassificationReader(DatasetReader):
 
         confidences = json_dict.get("confs", None)
 
-        additional_features = None
         
         # for sentences_loop, labels_loop, confidences_loop, additional_features_loop in  \
         #         self.enforce_max_sent_per_example(sentences, labels, confidences, additional_features):
-        for sentences_loop, labels_loop, confidences_loop, additional_features_loop in (sentences, labels, confidences, additional_features):
+        for sentences_loop, labels_loop, confidences_loop in [(sentences, labels, confidences)]:
             instance = self.text_to_instance(
                 sentences=sentences_loop,
                 labels=labels_loop,
                 confidences=confidences_loop,
-                additional_features=additional_features_loop,
                 )
             instances.append(instance)
         return instances
@@ -151,16 +149,12 @@ class SeqClassificationReader(DatasetReader):
                          sentences: List[str],
                          labels: List[str] = None,
                          confidences: List[float] = None,
-                         additional_features: List[float] = None,
                          ) -> Instance:
         if not self.predict:
             assert len(sentences) == len(labels)
         if confidences is not None:
             assert len(sentences) == len(confidences)
-        if additional_features is not None:
-            assert len(sentences) == len(additional_features)
-
-     
+    
         tok_sentences = []
         for sentence_text in sentences:
             if len(self._tokenizer.tokenize(sentence_text)) > self.sent_max_len:
@@ -191,14 +185,14 @@ class SeqClassificationReader(DatasetReader):
 
         if confidences is not None:
             fields['confidences'] = ArrayField(np.array(confidences))
-        if additional_features is not None:
-            fields["additional_features"] = ArrayField(np.array(additional_features))
+ 
 
         return Instance(fields)
 
     def apply_token_indexers(self, instance: Instance) -> None:
         for text_field in instance["sentences"].field_list:
             text_field.token_indexers = self._token_indexers
+
 
     # def shorten_sentences(self, origin_sent, max_len):
     #     tokenized_sentences = [self._tokenizer.sequence_pair_start_tokens]

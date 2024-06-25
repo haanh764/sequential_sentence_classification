@@ -29,9 +29,9 @@ export MODEL_TYPE=bert
 # export MODEL_TYPE=roberta
 
 # path to dataset files
-export TRAIN_PATH=data/CSAbstruct/train.jsonl
-export DEV_PATH=data/CSAbstruct/dev.jsonl
-export TEST_PATH=data/CSAbstruct/test.jsonl
+export TRAIN_PATH=data/ClarinEmo/train.jsonl
+export DEV_PATH=data/ClarinEmo/dev.jsonl
+export TEST_PATH=data/ClarinEmo/test.jsonl
 export TRAINING_DYNAMICS_PATH=data/training_dynamics_tmp
 
 # model

@@ -17,13 +17,13 @@ local boolToInt(s) =
         "tokenizer": {
             "type": "pretrained_transformer",
             "model_name": std.extVar("BERT_MODEL"),
-            "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
+            "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate', "additional_special_tokens": ['_#0#_', '_#1#_', '_#2#_', '_#3#_', '_#4#_', '_#5#_']},
         },
         "token_indexers": {
             "bert": {
                 "type": "pretrained_transformer",
                 "model_name": std.extVar("BERT_MODEL"),
-                "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate'},
+                "tokenizer_kwargs": {"truncation_strategy" : 'do_not_truncate', "additional_special_tokens": ['_#0#_', '_#1#_', '_#2#_', '_#3#_', '_#4#_', '_#5#_']},
             }
         },
         "sent_max_len": std.parseInt(std.extVar("SENT_MAX_LEN")),
@@ -46,7 +46,7 @@ local boolToInt(s) =
               "model_name": std.extVar("BERT_MODEL"),
               "train_parameters": 1,
               "last_layer_only": 1,
-
+              "tokenizer_kwargs": {"additional_special_tokens": ['_#0#_', '_#1#_', '_#2#_', '_#3#_', '_#4#_', '_#5#_']},
         }
         }
     },
@@ -72,7 +72,7 @@ local boolToInt(s) =
   "trainer": {
     "num_epochs": std.parseInt(std.extVar("NUM_EPOCHS")),
     "grad_clipping": 1.0,
-    "patience": 20,
+    "patience": 5,
     "validation_metric": if stringToBool(std.extVar("SCI_SUM")) then "-loss" else '+avg-microF',
     "cuda_device": std.parseInt(std.extVar("cuda_device")),
     "num_gradient_accumulation_steps": 32,

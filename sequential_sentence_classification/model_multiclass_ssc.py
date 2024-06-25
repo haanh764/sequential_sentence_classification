@@ -1,16 +1,92 @@
 import logging
-from typing import Dict
+from typing import Dict, List, Optional, Any
+import os
+import json
 
+import numpy as np
 import torch
 from torch.nn import Linear
 from allennlp.data import Vocabulary
 from allennlp.models.model import Model
-from allennlp.modules import TextFieldEmbedder, TimeDistributed, Seq2SeqEncoder
+from allennlp.modules import TextFieldEmbedder, Seq2SeqEncoder
 from allennlp.nn.util import get_text_field_mask
-from allennlp.training.metrics import F1Measure, CategoricalAccuracy
+from allennlp.training.metrics import CategoricalAccuracy
 from allennlp.modules.conditional_random_field import ConditionalRandomField
+from allennlp.training.metrics import Metric
+from allennlp.training.callbacks.callback import TrainerCallback
+from allennlp.training.trainer import Trainer
+from torchmetrics.classification import MulticlassF1Score
 
 logger = logging.getLogger(__name__)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+@TrainerCallback.register("SaveTrainingDynamics")
+class SaveTrainingDynamics(TrainerCallback):
+    def __init__(self, output_dir: str = None) -> None:
+        self.output_dir = output_dir
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        
+    def on_epoch(self, trainer: Trainer, metrics: Dict[str, Any], **kwargs) -> None:
+        dynamics = []
+        model = trainer.model
+
+        model.eval()
+        with torch.no_grad():
+            for batch in trainer.data_loader:
+                output = model.forward(**batch)
+                logits = output["logits"].detach().cpu().numpy()
+                golds = output["golds"].detach().cpu().numpy()
+                guids = batch['metadata'][0]
+
+                assert len(guids) == len(golds)
+                for gold, logit, guid in zip(golds, logits, guids):
+                    data = {
+                        "guid": guid['guid'],
+                        "gold": int(gold),
+                        "logits": logit.tolist()
+                    }
+                    dynamics.append(data)
+
+        # Write the dynamics to a JSONL file
+        epoch_number = trainer._epochs_completed
+        print(epoch_number)
+        
+        filename = f"dynamics_epoch_{epoch_number}.jsonl"
+        output_path = os.path.join(self.output_dir, filename)
+
+        with open(output_path, "w") as f:
+          f.write(json.dumps(dynamics) + "\n")
+
+class F1Score(Metric):
+    def __init__(self, num_classes, threshold=0.5, average='samples', label_names=None):
+        self.num_labels = num_classes
+        self.threshold = threshold
+        self.f1_score = MulticlassF1Score(num_classes=num_classes, average=average, threshold=threshold).to(device)
+        self._f1 = 0.0
+        self._count = 0
+        self.label_names = label_names
+
+    def __call__(self, predictions: torch.Tensor, gold_labels: torch.Tensor, mask: Optional[torch.Tensor] = None):
+        self.f1_score(predictions, gold_labels)
+
+    def get_metric(self, reset: bool = False):        
+        if reset:
+            self.reset()
+
+        if self.label_names:
+            f1_scores = {}
+            for i, name in enumerate(self.label_names):
+                f1_scores[name] = self.f1_score.compute()[i].item()
+            return f1_scores
+        else:
+            f1_score = self.f1_score.compute().item()
+            return {'f1_score': f1_score}
+
+    def reset(self):
+        self.f1_score.reset()
+        self._f1 = 0.0
+        self._count = 0
 
 @Model.register("SeqClassificationModel")
 class SeqClassificationModel(Model):
@@ -25,6 +101,8 @@ class SeqClassificationModel(Model):
                  self_attn: Seq2SeqEncoder = None,
                  bert_dropout: float = 0.1,
                  sci_sum: bool = False,
+                 intersentence_token: str = "[SEP]",
+                 model_type: str = "bert",
                  additional_feature_size: int = 0,
                  ) -> None:
         super(SeqClassificationModel, self).__init__(vocab)
@@ -36,7 +114,8 @@ class SeqClassificationModel(Model):
         self.sci_sum = sci_sum
         self.self_attn = self_attn
         self.additional_feature_size = additional_feature_size
-
+        self.token = intersentence_token
+        self.model_type = model_type
         self.dropout = torch.nn.Dropout(p=bert_dropout)
 
        # define loss
@@ -50,19 +129,25 @@ class SeqClassificationModel(Model):
             self.num_labels = self.vocab.get_vocab_size(namespace='labels')
             # define accuracy metrics
             self.label_accuracy = CategoricalAccuracy()
-            self.label_f1_metrics = {}
+            self.label_f1_metrics_macro = {}
+            self.label_f1_metrics_micro = {}
 
             # define F1 metrics per label
+            label_names = []
             for label_index in range(self.num_labels):
                 label_name = self.vocab.get_token_from_index(namespace='labels', index=label_index)
-                self.label_f1_metrics[label_name] = F1Measure(label_index)
+                label_names.append(label_name)
 
-        encoded_senetence_dim = text_field_embedder._token_embedders['bert'].output_dim
+            self.label_f1_metrics_macro = F1Score(num_classes=self.vocab.get_vocab_size(namespace='labels'), average="macro")
+            self.label_f1_metrics_micro = F1Score(num_classes=self.vocab.get_vocab_size(namespace='labels'), average="micro")
+            self.label_f1_metric = F1Score(num_classes=self.vocab.get_vocab_size(namespace='labels'), average=None, label_names=label_names)
+
+        encoded_senetence_dim = text_field_embedder._token_embedders['bert'].get_output_dim()
 
         ff_in_dim = encoded_senetence_dim if self.use_sep else self_attn.get_output_dim()
         ff_in_dim += self.additional_feature_size
 
-        self.time_distributed_aggregate_feedforward = TimeDistributed(Linear(ff_in_dim, self.num_labels))
+        self.time_distributed_aggregate_feedforward = Linear(ff_in_dim, self.num_labels)
 
         if self.with_crf:
             self.crf = ConditionalRandomField(
@@ -75,6 +160,7 @@ class SeqClassificationModel(Model):
                 labels: torch.IntTensor = None,
                 confidences: torch.Tensor = None,
                 additional_features: torch.Tensor = None,
+                metadata: List[Dict[str, Any]] = None,
                 ) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
         """
@@ -82,19 +168,13 @@ class SeqClassificationModel(Model):
         ----------
         TODO: add description
 
-        Returns
-        -------
-        An output dictionary consisting of:
-        loss : torch.FloatTensor, optional
-            A scalar loss to be optimised.
         """
         # ===========================================================================================================
-        # Layer 1: For each sentence, participant pair: create a Glove embedding for each token
         # Input: sentences
         # Output: embedded_sentences
 
         # embedded_sentences: batch_size, num_sentences, sentence_length, embedding_size
-        embedded_sentences = self.text_field_embedder(sentences)
+        embedded_sentences = self.text_field_embedder(sentences, num_wrapping_dims= 1)
         mask = get_text_field_mask(sentences, num_wrapping_dims=1).float()
         batch_size, num_sentences, _, _ = embedded_sentences.size()
 
@@ -102,9 +182,18 @@ class SeqClassificationModel(Model):
             # The following code collects vectors of the SEP tokens from all the examples in the batch,
             # and arrange them in one list. It does the same for the labels and confidences.
             # TODO: replace 103 with '[SEP]'
-            sentences_mask = sentences['bert'] == 103  # mask for all the SEP tokens in the batch
+            index_sep = int(self.vocab.get_token_index(token=self.token, namespace = "tags"))
+            sentences_mask = sentences['bert']["token_ids"] == index_sep # mask for all the SEP tokens in the batch
             embedded_sentences = embedded_sentences[sentences_mask]  # given batch_size x num_sentences_per_example x sent_len x vector_len
                                                                         # returns num_sentences_per_batch x vector_len
+            ## roberta only WORKS ONLY IF BATCH SIZE == 1
+            if (self.model_type == "roberta") or (self.model_type == "distilroberta"):            
+                assert batch_size == 1, "set batch size to 1 for RoBERTa"                                               
+                indx = np.arange(embedded_sentences.shape[0])
+                device = "cuda" 
+                sel_idx = torch.from_numpy(indx[indx%2==0]).to(device)# select only scond intersentence marker
+                embedded_sentences = torch.index_select(embedded_sentences, 0, sel_idx)
+            
             assert embedded_sentences.dim() == 2
             num_sentences = embedded_sentences.shape[0]
             # for the rest of the code in this model to work, think of the data we have as one example
@@ -197,7 +286,10 @@ class SeqClassificationModel(Model):
             flattened_gold = labels.contiguous().view(-1)
 
             if not self.with_crf:
-                label_loss = self.loss(flattened_logits.squeeze(), flattened_gold)
+                if flattened_logits.shape[0] == 1:
+                    label_loss = self.loss(flattened_logits, flattened_gold)
+                else:
+                    label_loss = self.loss(flattened_logits.squeeze(), flattened_gold)
                 if confidences is not None:
                     label_loss = label_loss * confidences.type_as(label_loss).view(-1)
                 label_loss = label_loss.mean()
@@ -215,17 +307,23 @@ class SeqClassificationModel(Model):
 
             if not self.labels_are_scores:
                 evaluation_mask = (flattened_gold != -1)
-                self.label_accuracy(flattened_probs.float().contiguous(), flattened_gold.squeeze(-1), mask=evaluation_mask)
+                if flattened_probs.shape[0] == 1:
+                    self.label_accuracy(flattened_probs.float().contiguous(), flattened_gold, mask=evaluation_mask)
+                else:
+                    self.label_accuracy(flattened_probs.float().contiguous(), flattened_gold.squeeze(-1), mask=evaluation_mask)
 
                 # compute F1 per label
-                for label_index in range(self.num_labels):
-                    label_name = self.vocab.get_token_from_index(namespace='labels', index=label_index)
-                    metric = self.label_f1_metrics[label_name]
-                    metric(flattened_probs, flattened_gold, mask=evaluation_mask)
+                self.label_f1_metrics_macro(flattened_probs, flattened_gold)
+                self.label_f1_metrics_micro(flattened_probs, flattened_gold)
+                self.label_f1_metric(flattened_probs, flattened_gold)
+      
         
         if labels is not None:
             output_dict["loss"] = label_loss
+            output_dict["golds"] = flattened_gold
+
         output_dict['action_logits'] = label_logits
+        output_dict['logits'] = flattened_logits
         return output_dict
 
     def get_metrics(self, reset: bool = False):
@@ -234,14 +332,17 @@ class SeqClassificationModel(Model):
         if not self.labels_are_scores:
             type_accuracy = self.label_accuracy.get_metric(reset)
             metric_dict['acc'] = type_accuracy
-
-            average_F1 = 0.0
-            for name, metric in self.label_f1_metrics.items():
-                metric_val = metric.get_metric(reset)
-                metric_dict[name + 'F'] = metric_val[2]
-                average_F1 += metric_val[2]
-
-            average_F1 /= len(self.label_f1_metrics.items())
-            metric_dict['avgF'] = average_F1
-
+            micro_scores = self.label_f1_metrics_micro.get_metric(reset=False)
+            macro_scores = self.label_f1_metrics_macro.get_metric(reset=False)
+            label_scores = self.label_f1_metric.get_metric(reset=False)
+            average_macro_F1 = 0.0
+            average_micro_F1 = 0.0
+            label_names = []
+            for label_index in range(self.num_labels):
+                label_name = self.vocab.get_token_from_index(namespace='labels', index=label_index)
+                label_names.append(label_name)
+            for i, label in enumerate(label_names):
+                metric_dict[label + '_F1'] = label_scores[f"{label}"]
+            metric_dict['avg-microF'] = micro_scores['f1_score']
+            metric_dict['avg-macroF'] = macro_scores['f1_score']
         return metric_dict
